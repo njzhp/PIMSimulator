@@ -1,5 +1,5 @@
 import numpy as np
-
+#! vector 1*1024 x matrix 1024*1024 = vector 1*1024
 # min dim_in = 128 -> 256bit / 16bit
 # min dim_out = 8 PIM block
 BATCH = 1
@@ -35,8 +35,8 @@ np.save("gemv_input_" + str(DIM_OUT) + "x" + str(DIM_IN), batch_in)
 np.save("gemv_weight_" + str(DIM_OUT) + "x" + str(DIM_IN), data_w)
 np.save("gemv_output_" + str(DIM_OUT) + "x" + str(DIM_IN), batch_out)
 np.save("test_output_" + str(DIM_OUT) + "x" + str(DIM_IN), batch_out2)
-print(batch_in)
-print(batch_out)
-print(batch_out2)
-print(batch_in.shape)
-print(batch_out.shape)
+print('gemv_input:\n',batch_in)
+print('gemv_output:\n',batch_out)
+print('test_output:\n',batch_out2)
+print('batch_in.shape:\n',batch_in.shape)
+print('batch_out.shape:\n',batch_out.shape)

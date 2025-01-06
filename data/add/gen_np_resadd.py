@@ -1,5 +1,5 @@
 import numpy as np
-
+#! matrix 1024*1024 + matrix 1024*1024 = matrix 1024*1024
 DIM_IN = 1024 * 1024
 
 np.set_printoptions(precision=20)

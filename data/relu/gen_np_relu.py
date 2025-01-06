@@ -7,6 +7,7 @@ dim_16ch = 16 * 8 * 8 * 16 * 48
 
 DIM_IN = 64 * 1024 * 2
 DIM_IN = 1024 * 1024
+#! relu(matrix 1024*1024) = matrix 1024*1024
 
 np.set_printoptions(precision=20)
 np.random.seed(1113)

@@ -4,7 +4,7 @@ from os.path import join as joinpath
 
 def setNumJobs():
     # to parallel build by default
-    SetOption('num_jobs', 32)
+    SetOption('num_jobs', 16)
     print("running with -j", GetOption('num_jobs'))
 
 

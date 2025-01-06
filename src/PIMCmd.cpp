@@ -12,6 +12,7 @@
 
 #include "PIMCmd.h"
 #include <cstdint>
+
 namespace DRAMSim
 {
 bool operator==(const PIMCmd& lhs, const PIMCmd& rhs)

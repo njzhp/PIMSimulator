@@ -363,7 +363,9 @@ void PIMKernel::preloadEltwise(NumpyBurstType* operand, pimBankType pb_type,
 */
 void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool is_tree)
 {
+    // 根据PIM块数量和GRF寄存器数将输出维度分块
     int num_output_tiles = ceil(((double)w_data->bShape[0] / (num_total_pim_blocks_)) / num_grfB_);
+    // 根据GRF寄存器数将输入维度分块 
     int num_input_tiles = ceil((double)w_data->bShape[1] / (double)num_grfA_);
     int num_batch = i_data->bShape[0];
     int zero_row = 1000;
@@ -399,6 +401,8 @@ void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool
         pim_cmds =
             PIMCmdGen::getPIMCmds(KernelType::GEMV, 0, num_jump_of_odd_bank, num_jump_of_even_bank);
     }
+
+    // 初始化PIM模式
     setControl(&bst_hab_pim_, true, getToggleCond(), false, true);
     parkIn();
     changePIMMode(dramMode::SB, dramMode::HAB);
@@ -414,6 +418,7 @@ void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool
                       (j + b) * num_grfB_;
             if (is_tree)
             {
+                // tree模式顺序处理
                 for (int i = 0; i < num_input_tiles; i++, col += num_grfB_)
                 {
                     computeGemv(i_data, num_input_tiles, num_output_tiles, i, j, b,
@@ -426,6 +431,7 @@ void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool
             }
             else
             {
+                // 普通模式分别处理奇数bank和偶数bank
                 for (int i = 0; i < num_input_tiles; i += 2)
                     computeGemv(i_data, num_input_tiles, num_output_tiles, i, j, b,
                                 pimBankType::EVEN_BANK);
@@ -448,7 +454,7 @@ void PIMKernel::computeGemv(NumpyBurstType* data, int num_input_tiles, int num_o
     {
         for (int ra_idx = 0; ra_idx < num_pim_ranks_; ra_idx++)
         {
-            // input upload to GRF
+            // input upload to GRF   遍历通道和rank,将输入数据写入GRF
             for (int gidx = 0; gidx < num_grfA_; gidx++)
             {
                 string str = "WRIO_TO_GRF_";
@@ -465,6 +471,7 @@ void PIMKernel::computeGemv(NumpyBurstType* data, int num_input_tiles, int num_o
     unsigned row = 0;
     unsigned col = (num_grfA_ * num_grfB_) * (inputTile / 2 + outputTile * num_input_tiles / 2);
 
+    // 每8个通道执行一次MAC运算
     for (int c_idx = 0; c_idx < 64; c_idx += 8)
         addTransactionAll(false, 0, (int)pb_type, row, col + c_idx, "MAC_", &null_bst_, true,
                           num_grfA_);

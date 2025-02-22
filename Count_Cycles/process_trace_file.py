@@ -59,6 +59,6 @@ def process_trace_file(input_file, output_file):
 
 # 使用示例
 if __name__ == "__main__":
-    input_file = "gemv1024_trace_bench.txt"
-    output_file = "gemv1024_trace_bench_processed.txt"
+    input_file = "Count_Cycles/gemv4096_14436_trace_bench.out"
+    output_file = "Count_Cycles/gemv4096_14336_trace_processed.out"
     process_trace_file(input_file, output_file)

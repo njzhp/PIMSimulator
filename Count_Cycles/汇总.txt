@@ -1,0 +1,179 @@
+1024 4096
+MAC: 1758 cycles (48.01%)
+PRECHARGE: 415 cycles (11.33%)
+ACTIVATE: 391 cycles (10.68%)
+BWRITE_GRF_A: 385 cycles (10.51%)
+REF: 350 cycles (9.56%)
+JUMP: 256 cycles (6.99%)
+READ: 66 cycles (1.80%)
+WRITE: 40 cycles (1.09%)
+NOP: 35 cycles (0.96%)
+HAB: 15 cycles (0.41%)
+BWRITE_CRF: 11 cycles (0.30%)
+GRF_B_ZEROIZE: 4 cycles (0.11%)
+HAB_PIM: 4 cycles (0.11%)
+SB: 1 cycles (0.03%)
+Total cycles: 3662 cycles
+
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from PIMBenchFixture
+[ RUN      ] PIMBenchFixture.gemv
+>>Performance Test
+  GEMV (PIM disabled)
+  Weight data dimension : 4096x1024
+  Input data dimension : 1024
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 9042
+
+  GEMV (PIM enabled)
+  Weight data dimension : 4096x1024
+  Input data dimension : 1024
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 3662
+
+> Speed-up : 2.46914
+[       OK ] PIMBenchFixture.gemv (8204 ms)
+[----------] 1 test from PIMBenchFixture (8204 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (8204 ms total)
+[  PASSED  ] 1 test.
+
+
+
+4096 4096
+MAC: 7007 cycles (53.22%)
+BWRITE_GRF_A: 1585 cycles (12.04%)
+PRECHARGE: 1283 cycles (9.74%)
+ACTIVATE: 1204 cycles (9.14%)
+REF: 1060 cycles (8.05%)
+JUMP: 1024 cycles (7.78%)
+READ: 66 cycles (0.50%)
+WRITE: 40 cycles (0.30%)
+NOP: 35 cycles (0.27%)
+HAB: 15 cycles (0.11%)
+BWRITE_CRF: 11 cycles (0.08%)
+GRF_B_ZEROIZE: 4 cycles (0.03%)
+HAB_PIM: 4 cycles (0.03%)
+SB: 1 cycles (0.01%)
+Total cycles: 13166 cycles
+
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from PIMBenchFixture
+[ RUN      ] PIMBenchFixture.gemv
+>>Performance Test
+  GEMV (PIM disabled)
+  Weight data dimension : 4096x4096
+  Input data dimension : 4096
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 36082
+
+  GEMV (PIM enabled)
+  Weight data dimension : 4096x4096
+  Input data dimension : 4096
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 13166
+
+> Speed-up : 2.74054
+[       OK ] PIMBenchFixture.gemv (36714 ms)
+[----------] 1 test from PIMBenchFixture (36714 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (36714 ms total)
+[  PASSED  ] 1 test.
+
+
+4096 14336
+MAC: 28022 cycles (53.95%)
+BWRITE_GRF_A: 6352 cycles (12.23%)
+PRECHARGE: 4727 cycles (9.10%)
+REF: 4618 cycles (8.89%)
+ACTIVATE: 4402 cycles (8.48%)
+JUMP: 4091 cycles (7.88%)
+NOP: 140 cycles (0.27%)
+READ: 66 cycles (0.13%)
+WRITE: 40 cycles (0.08%)
+GRF_B_ZEROIZE: 34 cycles (0.07%)
+HAB_PIM: 34 cycles (0.07%)
+HAB: 27 cycles (0.05%)
+BWRITE_CRF: 11 cycles (0.02%)
+SB: 1 cycles (0.00%)
+Total cycles: 51941 cycles
+
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from PIMBenchFixture
+[ RUN      ] PIMBenchFixture.gemv
+>>Performance Test
+  GEMV (PIM disabled)
+  Weight data dimension : 14336x4096
+  Input data dimension : 4096
+  Output data dimension : 14336
+> Test Results 
+> Cycle : 125245
+
+  GEMV (PIM enabled)
+  Weight data dimension : 14336x4096
+  Input data dimension : 4096
+  Output data dimension : 14336
+> Test Results 
+> Cycle : 51941
+
+> Speed-up : 2.41129
+[       OK ] PIMBenchFixture.gemv (161814 ms)
+[----------] 1 test from PIMBenchFixture (161814 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (161814 ms total)
+[  PASSED  ] 1 test.
+
+
+14336 4096
+MAC: 24522 cycles (53.77%)
+BWRITE_GRF_A: 5568 cycles (12.21%)
+REF: 4248 cycles (9.31%)
+PRECHARGE: 4128 cycles (9.05%)
+ACTIVATE: 3884 cycles (8.52%)
+JUMP: 3583 cycles (7.86%)
+READ: 66 cycles (0.14%)
+WRITE: 40 cycles (0.09%)
+NOP: 35 cycles (0.08%)
+HAB: 15 cycles (0.03%)
+BWRITE_CRF: 11 cycles (0.02%)
+GRF_B_ZEROIZE: 4 cycles (0.01%)
+HAB_PIM: 4 cycles (0.01%)
+SB: 1 cycles (0.00%)
+Total cycles: 45606 cycles
+
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from PIMBenchFixture
+[ RUN      ] PIMBenchFixture.gemv
+>>Performance Test
+  GEMV (PIM disabled)
+  Weight data dimension : 4096x14336
+  Input data dimension : 14336
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 125239
+
+  GEMV (PIM enabled)
+  Weight data dimension : 4096x14336
+  Input data dimension : 14336
+  Output data dimension : 4096
+> Test Results 
+> Cycle : 45606
+
+> Speed-up : 2.74611
+[       OK ] PIMBenchFixture.gemv (145667 ms)
+[----------] 1 test from PIMBenchFixture (145668 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (145668 ms total)
+[  PASSED  ] 1 test.

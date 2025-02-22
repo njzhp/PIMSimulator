@@ -36,8 +36,8 @@ def parse_line(line):
     return instr, cycle
 
 def main():
-    filename = "gemv1024_trace_bench_processed.txt"
-    TOTAL_CYCLES = 3662        #! 程序最终结束周期数
+    filename = "Count_Cycles/gemv4096_14336_trace_processed.out"
+    TOTAL_CYCLES = 51941        #! 程序最终结束周期数
     instructions = []
     
     # 逐行读取文件，解析出 (instr, cycle)

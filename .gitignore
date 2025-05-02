@@ -13,6 +13,7 @@
 
 # Compiled Dynamic libraries
 *.so
+*.os
 *.dylib
 *.dll
 
@@ -37,5 +38,5 @@ sim
 *.orig
 tags
 .sconsign.dblite
-bin
+bin/
 

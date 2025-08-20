@@ -1,96 +1,169 @@
 import os
 from os.path import join as joinpath
+# Import necessary SCons functions
+from SCons.Script import Environment, Glob, Dir, ARGUMENTS, SetOption, GetOption, VariantDir
 
-
-def setNumJobs():
-    # to parallel build by default
-    SetOption('num_jobs', 4)
-    print("running with -j", GetOption('num_jobs'))
-
-
-def getFlags(env):
-    no_storage = ARGUMENTS.get('NO_STORAGE', 0)
-    if int(no_storage):
-        env.Append(CXXFLAGS=" -DNO_STORAGE")
-    return env
-
-
-def getSources(target):
-    en_emul = ARGUMENTS.get('NO_EMUL', 0)
-
-    if (target == "build"):
-        build_sources = (Glob(joinpath(base_path["build"], "*.cpp")) +
-                         Glob(joinpath(base_path["build"], "tests/*.cpp")))
-        if int(en_emul) != 1:
-            build_sources += Glob(joinpath(base_path["tools_build"], "*/*.cpp"))
-        sources = build_sources
-    elif (target == "lib"):
-        lib_sources = Glob(joinpath(base_path["build"], "*.cpp"))
-        lib_sources += Glob(joinpath(base_path["build"], "tests/PIMCmdGen.cpp"))
-        lib_sources += Glob(joinpath(base_path["build"], "tests/PIMKernel.cpp"))
-        lib_sources += Glob(joinpath(base_path["build"], "tests/KernelAddrGen.cpp"))
-        if int(en_emul) != 1:
-            lib_sources += Glob(joinpath(base_path["tools_build"], "emulator_api/*.cpp"))
-        sources = lib_sources
-    return sources
-
-
-def build(target_name, base_path, build_flags):
-    # setup the default build envronments
-    env = Environment()
-
-    env.Append(CXXFLAGS=build_flags["CXXFLAGS"] + build_flags["gprof_option"])
-    env.Append(LINKFLAGS=build_flags["LINKFLAGS"] + build_flags["gprof_option"])
-
-    # add flags
-    env = getFlags(env)
-
-    env.VariantDir(base_path["build"], base_path["source"], duplicate=0)
-    env.VariantDir(base_path["tools_build"], base_path["tools"], duplicate=0)
-    build_sources = getSources("build")
-    env.Program(target=target_name["binary"],
-                source=build_sources,
-                CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                LIBPATH=['.'], LIBS=['gtest', 'pthread'])
-
-    no_lib = ARGUMENTS.get('NO_LIBRARY', 0)
-    if int(no_lib) == 0:
-        lib_sources = getSources("lib")
-        # print ("Creating a static library from objects")
-        env.StaticLibrary(target=target_name["library"],
-                          source=lib_sources,
-                          CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                          LIBPATH=['.'],
-                          LIBS=['gtest', 'pthread'])
-        # print ("Creating a shared library from objects")
-        env.SharedLibrary(target=target_name["library"],
-                          source=lib_sources,
-                          CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                          LIBPATH=['.'],
-                          LIBS=['gtest', 'pthread'])
-
-
+# Define base_path and target_name earlier so they can be used globally if needed
+# (Especially base_path needed in getSources)
 root_path = Dir('.').abspath
+
+base_path = {
+    "source": joinpath(root_path, 'src'),
+    "test": joinpath(root_path, 'src/tests'), # Note: test path not used in getSources logic below
+    "build": joinpath(root_path, 'bin'),
+    "lib": joinpath(root_path, 'lib'), # Project's own lib dir (if any headers)
+    "tools_build": joinpath(root_path, 'bin/tools'), # Build dir for tools objects
+    "tools": joinpath(root_path, 'tools'),         # Source dir for tools
+}
 
 target_name = {
     "binary": 'sim',
     "library": './libdramsim/dramsim2',
 }
 
-base_path = {
-    "source": joinpath(root_path, 'src'),
-    "test": joinpath(root_path, 'src/tests'),
-    "build": joinpath(root_path, 'bin'),
-    "lib": joinpath(root_path, 'lib'),
-    "tools_build": joinpath(root_path, 'bin/tools'),
-    "tools": joinpath(root_path, 'tools'),
-}
+# --- SCons Helper Functions ---
 
+def setNumJobs():
+    # to parallel build by default
+    try:
+        # Use ARGUMENTS.get to safely handle if 'jobs' isn't provided
+        jobs = int(ARGUMENTS.get('jobs', 16)) # Default to 16 if not specified
+        SetOption('num_jobs', jobs)
+        print("running with -j", GetOption('num_jobs'))
+    except ValueError:
+        print("Warning: Invalid value provided for 'jobs'. Using default 16.")
+        SetOption('num_jobs', 16)
+
+
+def getFlags(env):
+    no_storage = ARGUMENTS.get('NO_STORAGE', 0)
+    if int(no_storage):
+        # Appending as a single string works, but CPPDEFINES is more idiomatic
+        # env.Append(CPPDEFINES=['NO_STORAGE']) # Alternative SCons way
+        env.Append(CXXFLAGS=["-DNO_STORAGE"]) # Append as list item
+        env.Append(LINKFLAGS=["-DNO_STORAGE"]) # Definitions might affect linking too? If not needed, remove.
+    # No need to return env if modifying in place, but doesn't hurt
+    return env
+
+
+def getSources(target):
+    """
+    Retrieves source files based on the target type.
+    Uses Glob relative to the SConstruct directory, searching in SOURCE paths.
+    VariantDir maps these sources to the BUILD directories.
+    """
+    en_emul = ARGUMENTS.get('NO_EMUL', 0)
+    sources = []
+
+    if (target == "build"):
+        # Glob patterns search in SOURCE directories
+        build_sources = (Glob(joinpath(base_path["source"], "*.cpp")) +
+                         Glob(joinpath(base_path["source"], "tests/*.cpp")))
+        if int(en_emul) != 1:
+            # Search within the tools SOURCE directory
+            build_sources += Glob(joinpath(base_path["tools"], "*/*.cpp"))
+        sources = build_sources
+    elif (target == "lib"):
+        # Glob patterns search in SOURCE directories
+        lib_sources = Glob(joinpath(base_path["source"], "*.cpp"))
+        # Add specific test files (assuming they contain code needed in the library)
+        # Ensure these paths correctly point to files within base_path["source"]
+        lib_sources += Glob(joinpath(base_path["source"], "tests/PIMCmdGen.cpp"))
+        lib_sources += Glob(joinpath(base_path["source"], "tests/PIMKernel.cpp"))
+        lib_sources += Glob(joinpath(base_path["source"], "tests/KernelAddrGen.cpp"))
+
+        if int(en_emul) != 1:
+            # Search within the tools SOURCE directory
+            lib_sources += Glob(joinpath(base_path["tools"], "emulator_api/*.cpp"))
+        sources = lib_sources
+    # Make sources unique (optional, SCons might handle duplicates)
+    # sources = list(set(sources))
+    return sources
+
+
+# --- Main Build Function ---
+
+def build(target_name, base_path, build_flags):
+    # setup the default build envronments
+    env = Environment()
+
+    # --- Base Environment Setup ---
+    # Googletest path AND project paths
+    env.Append(CPPPATH=[
+            '/u3disk/zhouhp/local/include',  # For gtest/gtest.h
+            base_path["lib"],               # Project lib headers
+            base_path["source"],            # Project source headers
+            base_path["tools"],             # Project tools headers
+        ])
+    # Library search paths
+    env.Append(LIBPATH=[
+            '/u3disk/zhouhp/local/lib',     # For libgtest.a / libgtest.so
+            '.'                             # Current dir (less common needed)
+        ])
+    # Libraries to link
+    env.Append(LIBS=['gtest', 'pthread'])
+
+    # Compiler and Linker flags (using lists from build_flags)
+    env.Append(CXXFLAGS=build_flags["CXXFLAGS"])
+    env.Append(LINKFLAGS=build_flags["LINKFLAGS"])
+    # Append gprof options only if they exist (assuming list format)
+    if build_flags["gprof_option"]:
+        env.Append(CXXFLAGS=build_flags["gprof_option"])
+        env.Append(LINKFLAGS=build_flags["gprof_option"])
+
+
+    # add conditional flags (e.g., -DNO_STORAGE)
+    env = getFlags(env) # Modifies env
+
+    # --- Build Directory Setup (Shadow Build) ---
+    # Map source directories to build directories
+    env.VariantDir(base_path["build"], base_path["source"], duplicate=0)
+    env.VariantDir(base_path["tools_build"], base_path["tools"], duplicate=0)
+
+    # --- Target Building ---
+    # Get sources using the corrected getSources function
+    build_sources = getSources("build")
+
+    # Build the program
+    # NO CPPPATH/LIBPATH override needed here - inherits from env
+    # Explicit LIBS is okay, but redundant as they are already in env['LIBS']
+    env.Program(target=target_name["binary"],
+                source=build_sources,
+                #LIBS=['gtest', 'pthread'] # Inherited from env
+                )
+
+    no_lib = ARGUMENTS.get('NO_LIBRARY', 0)
+    if int(no_lib) == 0:
+        # Get library sources using the corrected getSources function
+        lib_sources = getSources("lib")
+
+        # Build static library
+        # REMOVED CPPPATH/LIBPATH/LIBS overrides - inherit fully from env
+        env.StaticLibrary(target=target_name["library"],
+                          source=lib_sources)
+
+        # Build shared library
+        # REMOVED CPPPATH/LIBPATH/LIBS overrides - inherit fully from env
+        env.SharedLibrary(target=target_name["library"],
+                          source=lib_sources)
+
+
+# --- Script Execution ---
+
+# Define build flags (use lists for flags)
 build_flags = {
-    "gprof_option": '',
-    "CXXFLAGS": '-g -O2 -std=c++14 -Wall -Wno-reorder -Wno-sign-compare',
-    "LINKFLAGS": '-g -O2 -std=c++14 -Wall -Wno-reorder -Wno-sign-compare',
+    "gprof_option": [], # Example: ['-pg'] if needed, otherwise empty list
+    "CXXFLAGS": ['-g', '-O2', '-std=c++17', '-Wall', '-Wno-reorder', '-Wno-sign-compare'],
+    "LINKFLAGS": ['-g', '-O2', '-std=c++17', '-Wall', '-Wno-reorder', '-Wno-sign-compare'],
 }
 
+# Set parallel jobs
 setNumJobs()
+
+# Execute the build
 build(target_name, base_path, build_flags)
+
+# Optional: Print final environment variables for debugging
+# print("Final CPPPATH:", DefaultEnvironment()['CPPPATH'])
+# print("Final LIBPATH:", DefaultEnvironment()['LIBPATH'])
+# print("Final LIBS:", DefaultEnvironment()['LIBS'])
